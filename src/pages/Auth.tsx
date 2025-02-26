@@ -1,7 +1,6 @@
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { supabase, sendPasswordResetEmail, verifyOTP } from '../lib/supabase';
 import '../styles/animations.css';
 
 const foodImages = [
@@ -61,14 +60,10 @@ interface AuthFormData {
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [registeredEmails, setRegisteredEmails] = useState<string[]>([]);
-  const [verificationCode, setVerificationCode] = useState('');
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
   const navigate = useNavigate();
   const { signIn, signUp } = useApp();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -81,21 +76,6 @@ export default function Auth() {
     confirmPassword: '',
     phoneNumber: '',
   });
-
-  useEffect(() => {
-    const imageInterval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % foodImages.length);
-      setCurrentQuoteIndex((prev) => (prev + 1) % foodQuotes.length);
-    }, 5000);
-
-    // Load registered emails from localStorage
-    const savedEmails = localStorage.getItem('registeredEmails');
-    if (savedEmails) {
-      setRegisteredEmails(JSON.parse(savedEmails));
-    }
-
-    return () => clearInterval(imageInterval);
-  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -168,171 +148,9 @@ export default function Auth() {
     }
   };
 
-  const handleForgotPassword = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true);
-
-    try {
-      // Check if email exists
-      if (!registeredEmails.includes(resetEmail)) {
-        throw new Error('No account found with this email address');
-      }
-
-      const { success, error } = await sendPasswordResetEmail(resetEmail);
-      if (!success) throw error;
-
-      setSuccess('Password reset instructions have been sent to your email');
-      setIsVerifying(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send reset instructions');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyCode = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const { success, error } = await verifyOTP(resetEmail, verificationCode);
-      if (!success) throw error;
-
-      setSuccess('Code verified successfully. You can now set a new password.');
-      navigate('/auth/reset-password');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid verification code');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Render forgot password form
-  if (isForgotPassword) {
-    return (
-      <div className="min-h-screen flex">
-        {/* Left Panel - Keep the same as main Auth component */}
-        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-[#2C1810]/90 to-transparent z-10" />
-          {foodImages.map((image, index) => (
-            <img
-              key={image}
-              src={image}
-              alt="Food imagery"
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-                index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-              }`}
-            />
-          ))}
-          <div className="relative z-20 p-12 flex flex-col justify-center h-full">
-            <div className="max-w-md transition-opacity duration-1000">
-              <blockquote className="text-2xl font-light text-white italic mb-4">
-                "{foodQuotes[currentQuoteIndex].quote}"
-              </blockquote>
-              <p className="text-[#FFA07A]">- {foodQuotes[currentQuoteIndex].author}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Panel - Forgot Password Form */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-[#FFF5F5]">
-          <div className="max-w-md w-full space-y-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-[#2C1810] mb-2">
-                Reset Your Password
-              </h2>
-              <p className="text-gray-600">
-                {!isVerifying 
-                  ? 'Enter your email to receive a verification code'
-                  : 'Enter the verification code sent to your email'
-                }
-              </p>
-            </div>
-
-            {error && (
-              <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-500 text-green-700">
-                {success}
-              </div>
-            )}
-
-            <form onSubmit={isVerifying ? handleVerifyCode : handleForgotPassword} className="space-y-6">
-              {!isVerifying ? (
-                <div>
-                  <label htmlFor="resetEmail" className="block text-sm font-medium text-[#2C1810]">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="resetEmail"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors"
-                    required
-                  />
-                </div>
-              ) : (
-                <div>
-                  <label htmlFor="verificationCode" className="block text-sm font-medium text-[#2C1810]">
-                    Verification Code
-                  </label>
-                  <input
-                    type="text"
-                    id="verificationCode"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                    className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors"
-                    required
-                  />
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className={`w-full px-8 py-4 bg-[#FF6B6B] text-white rounded-xl font-medium hover:bg-[#FF8787] transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                  loading ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
-              >
-                {loading 
-                  ? 'Please wait...' 
-                  : isVerifying 
-                    ? 'Verify Code' 
-                    : 'Send Reset Instructions'
-                }
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsForgotPassword(false);
-                  setIsVerifying(false);
-                  setError('');
-                  setSuccess('');
-                }}
-                className="w-full text-center text-[#FF6B6B] hover:text-[#FF8787] font-medium"
-              >
-                Back to Sign In
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Main Auth form (Sign In/Sign Up)
   return (
     <div className="min-h-screen flex">
-      {/* Left Panel - Image */}
+      {/* Left Panel */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-[#2C1810]/90 to-transparent z-10" />
         {foodImages.map((image, index) => (
@@ -346,39 +164,37 @@ export default function Auth() {
           />
         ))}
         <div className="relative z-20 p-12 flex flex-col justify-center h-full">
-          <div className="max-w-md transition-opacity duration-1000 animate-float">
-            <blockquote className="text-2xl font-light text-white italic mb-4 animate-fadeIn stagger-1">
+          <div className="max-w-md transition-opacity duration-1000">
+            <blockquote className="text-2xl font-light text-white italic mb-4">
               "{foodQuotes[currentQuoteIndex].quote}"
             </blockquote>
-            <p className="text-[#FFA07A] animate-fadeIn stagger-2">
-              - {foodQuotes[currentQuoteIndex].author}
-            </p>
+            <p className="text-[#FFA07A]">- {foodQuotes[currentQuoteIndex].author}</p>
           </div>
         </div>
       </div>
 
-      {/* Right Panel - Auth Form */}
+      {/* Right Panel - Sign In/Sign Up Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-[#FFF5F5]">
-        <div className="max-w-md w-full space-y-8 animate-scaleIn">
+        <div className="max-w-md w-full space-y-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-[#2C1810] mb-2 animate-fadeIn">
-              {isSignUp ? 'Join our culinary community' : 'Welcome back, chef!'}
+            <h2 className="text-3xl font-bold text-[#2C1810] mb-2">
+              {isSignUp ? 'Create an Account' : 'Welcome Back'}
             </h2>
-            <p className="text-gray-600 animate-fadeIn stagger-1">
+            <p className="text-gray-600">
               {isSignUp
-                ? 'Start your journey to amazing recipes'
-                : 'Sign in to access your recipe collection'}
+                ? 'Join our community of food lovers'
+                : 'Sign in to access your recipes'}
             </p>
           </div>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 animate-slideIn">
+            <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 animate-success">
+            <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-500 text-green-700">
               {success}
             </div>
           )}
@@ -395,7 +211,7 @@ export default function Auth() {
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors focus-ring hover-lift animate-fadeIn stagger-2"
+                  className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -411,28 +227,10 @@ export default function Auth() {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors focus-ring hover-lift animate-fadeIn stagger-2"
+                className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors"
                 placeholder="Enter your email"
               />
             </div>
-
-            {isSignUp && (
-              <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-[#2C1810]">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors"
-                  placeholder="Enter your phone number"
-                  required
-                />
-              </div>
-            )}
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-[#2C1810]">
@@ -444,22 +242,10 @@ export default function Auth() {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors focus-ring hover-lift animate-fadeIn stagger-3"
+                className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors"
                 placeholder="Enter your password"
               />
             </div>
-
-            {isSignUp && (
-              <div className="text-sm text-gray-600">
-                <p className="font-medium mb-2">Password Requirements:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>At least 8 characters long</li>
-                  <li>At least one uppercase letter</li>
-                  <li>At least one lowercase letter</li>
-                  <li>At least one number</li>
-                </ul>
-              </div>
-            )}
 
             {isSignUp && (
               <div>
@@ -475,22 +261,6 @@ export default function Auth() {
                   className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors"
                   placeholder="Confirm your password"
                 />
-              </div>
-            )}
-
-            {!isSignUp && (
-              <div className="text-right">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsForgotPassword(true);
-                    setError('');
-                    setSuccess('');
-                  }}
-                  className="text-sm text-[#FF6B6B] hover:text-[#FF8787] font-medium"
-                >
-                  Forgot Password?
-                </button>
               </div>
             )}
 

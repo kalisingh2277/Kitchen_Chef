@@ -14,38 +14,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-// Helper function for password reset
-export const sendPasswordResetEmail = async (email: string) => {
-  try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-      data: {
-        email_subject: 'Reset Your Kitchen Chef Password',
-        email_template: 'kitchen-chef-reset'
-      }
-    });
-    if (error) throw error;
-    return { success: true };
-  } catch (error) {
-    return { success: false, error };
-  }
-};
-
-// Helper function for OTP verification
-export const verifyOTP = async (email: string, token: string) => {
-  try {
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: 'recovery',
-    });
-    if (error) throw error;
-    return { success: true };
-  } catch (error) {
-    return { success: false, error };
-  }
-};
-
 // Type definitions for our database schema
 export type User = {
   id: string;

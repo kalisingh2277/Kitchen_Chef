@@ -8,7 +8,6 @@ import RecipeDetails from './pages/RecipeDetails';
 import CreateRecipe from './pages/CreateRecipe';
 import Favorites from './pages/Favorites';
 import Profile from './pages/Profile';
-import ResetPassword from './pages/ResetPassword';
 import Header from './components/Header';
 import { useApp } from './context/AppContext';
 import { useEffect } from 'react';
@@ -37,7 +36,6 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/search" element={<RecipeSearch />} />
             <Route path="/create" element={<CreateRecipe />} />
             <Route path="/favorites" element={<Favorites />} />
