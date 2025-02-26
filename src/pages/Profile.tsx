@@ -189,6 +189,35 @@ export default function Profile() {
                   className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors"
                   required
                 />
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                  <p className="text-sm font-medium text-[#2C1810] mb-2">Password Requirements:</p>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li className={`flex items-center space-x-2 ${
+                      passwordForm.newPassword.length >= 8 ? 'text-green-600' : ''
+                    }`}>
+                      <span>{passwordForm.newPassword.length >= 8 ? '✓' : '•'}</span>
+                      <span>At least 8 characters long</span>
+                    </li>
+                    <li className={`flex items-center space-x-2 ${
+                      /[A-Z]/.test(passwordForm.newPassword) ? 'text-green-600' : ''
+                    }`}>
+                      <span>{/[A-Z]/.test(passwordForm.newPassword) ? '✓' : '•'}</span>
+                      <span>At least one uppercase letter</span>
+                    </li>
+                    <li className={`flex items-center space-x-2 ${
+                      /[a-z]/.test(passwordForm.newPassword) ? 'text-green-600' : ''
+                    }`}>
+                      <span>{/[a-z]/.test(passwordForm.newPassword) ? '✓' : '•'}</span>
+                      <span>At least one lowercase letter</span>
+                    </li>
+                    <li className={`flex items-center space-x-2 ${
+                      /[0-9]/.test(passwordForm.newPassword) ? 'text-green-600' : ''
+                    }`}>
+                      <span>{/[0-9]/.test(passwordForm.newPassword) ? '✓' : '•'}</span>
+                      <span>At least one number</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
 
               <div>
@@ -205,16 +234,17 @@ export default function Profile() {
                   className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors"
                   required
                 />
-              </div>
-
-              <div className="text-sm text-gray-600">
-                <p className="font-medium mb-2">Password Requirements:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>At least 8 characters long</li>
-                  <li>At least one uppercase letter</li>
-                  <li>At least one lowercase letter</li>
-                  <li>At least one number</li>
-                </ul>
+                {passwordForm.newPassword && passwordForm.confirmNewPassword && (
+                  <p className={`mt-2 text-sm ${
+                    passwordForm.newPassword === passwordForm.confirmNewPassword
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  }`}>
+                    {passwordForm.newPassword === passwordForm.confirmNewPassword
+                      ? '✓ Passwords match'
+                      : '✗ Passwords do not match'}
+                  </p>
+                )}
               </div>
 
               <button

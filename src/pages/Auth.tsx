@@ -261,6 +261,35 @@ export default function Auth() {
                   className="mt-1 block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-[#FF6B6B] focus:border-[#FF6B6B] transition-colors"
                   placeholder="Confirm your password"
                 />
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                  <p className="text-sm font-medium text-[#2C1810] mb-2">Password Requirements:</p>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li className={`flex items-center space-x-2 ${
+                      formData.password.length >= 8 ? 'text-green-600' : ''
+                    }`}>
+                      <span>{formData.password.length >= 8 ? '✓' : '•'}</span>
+                      <span>At least 8 characters long</span>
+                    </li>
+                    <li className={`flex items-center space-x-2 ${
+                      /[A-Z]/.test(formData.password) ? 'text-green-600' : ''
+                    }`}>
+                      <span>{/[A-Z]/.test(formData.password) ? '✓' : '•'}</span>
+                      <span>At least one uppercase letter</span>
+                    </li>
+                    <li className={`flex items-center space-x-2 ${
+                      /[a-z]/.test(formData.password) ? 'text-green-600' : ''
+                    }`}>
+                      <span>{/[a-z]/.test(formData.password) ? '✓' : '•'}</span>
+                      <span>At least one lowercase letter</span>
+                    </li>
+                    <li className={`flex items-center space-x-2 ${
+                      /[0-9]/.test(formData.password) ? 'text-green-600' : ''
+                    }`}>
+                      <span>{/[0-9]/.test(formData.password) ? '✓' : '•'}</span>
+                      <span>At least one number</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             )}
 
