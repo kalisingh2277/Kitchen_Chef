@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useApp } from '../context/AppContext';
 import RecipeCard from '../components/RecipeCard';
 import React from 'react';
 
@@ -293,13 +292,10 @@ const fetchRecipesFromAllSources = async (cuisine: string): Promise<Recipe[]> =>
 };
 
 export default function RecipeSearch() {
-  const { user } = useApp();
-  const [selectedFoodType, setSelectedFoodType] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCuisine, setSelectedCuisine] = useState<string>('All');
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isVegetarian, setIsVegetarian] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const recipesPerPage = 12;
@@ -308,7 +304,7 @@ export default function RecipeSearch() {
     setPage(1);
     setRecipes([]);
     fetchRecipes(1);
-  }, [selectedFoodType, isVegetarian]);
+  }, [selectedCuisine]);
 
   const fetchRecipes = async (pageNum: number) => {
     setLoading(true);
@@ -316,14 +312,14 @@ export default function RecipeSearch() {
     try {
       let allRecipes: Recipe[] = [];
       
-      if (selectedFoodType) {
-        allRecipes = await fetchRecipesFromAllSources(selectedFoodType);
-      } else {
+      if (selectedCuisine === 'All') {
         // Fetch a mix of recipes from different cuisines
         const defaultCuisines = ['Indian', 'Italian', 'Chinese', 'Mexican', 'French'];
         const promises = defaultCuisines.map(cuisine => fetchRecipesFromAllSources(cuisine));
         const results = await Promise.all(promises);
         allRecipes = results.flat();
+      } else {
+        allRecipes = await fetchRecipesFromAllSources(selectedCuisine);
       }
 
       // Filter recipes
@@ -331,22 +327,6 @@ export default function RecipeSearch() {
         .filter((recipe: Recipe) => {
           // Basic filter to remove unwanted recipes
           if (recipe.strMeal.toLowerCase() === 'migas') return false;
-
-          // Vegetarian filter
-          if (isVegetarian) {
-            const nonVegKeywords = [
-              'chicken', 'beef', 'pork', 'fish', 'lamb', 'meat', 'seafood',
-              'prawn', 'shrimp', 'turkey', 'bacon', 'ham', 'sausage'
-            ];
-            
-            // Check if recipe name or category contains non-veg keywords
-            const isNonVeg = nonVegKeywords.some(keyword => 
-              recipe.strMeal.toLowerCase().includes(keyword) ||
-              recipe.strCategory?.toLowerCase().includes(keyword)
-            );
-            
-            return !isNonVeg;
-          }
 
           return true;
         });
@@ -367,11 +347,7 @@ export default function RecipeSearch() {
 
       // If no recipes found after filtering, show appropriate message
       if (filteredRecipes.length === 0) {
-        setError(
-          isVegetarian
-            ? 'No vegetarian recipes found for this cuisine. Try a different cuisine or disable vegetarian filter.'
-            : 'No recipes found for this cuisine. Try a different cuisine.'
-        );
+        setError('No recipes found for this cuisine. Try a different cuisine.');
       }
     } catch (err) {
       setError('Failed to fetch recipes. Please try again later.');
@@ -403,36 +379,28 @@ export default function RecipeSearch() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Filters Sidebar */}
           <div className="lg:col-span-3 space-y-6">
-            {/* Vegetarian Toggle */}
-            <div className="bg-white rounded-2xl shadow-md p-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-[#2C1810]">
-                  Vegetarian Only
-                </h3>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={isVegetarian}
-                    onChange={(e) => setIsVegetarian(e.target.checked)}
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#FF6B6B]/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF6B6B]"></div>
-                </label>
-              </div>
-            </div>
-
             {/* Cuisine Type Filter */}
             <div className="bg-white rounded-2xl shadow-md p-6">
               <h3 className="text-lg font-semibold text-[#2C1810] mb-4">
                 Cuisine Type
               </h3>
               <div className="space-y-2">
+                <button
+                  onClick={() => setSelectedCuisine('All')}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                    selectedCuisine === 'All'
+                      ? 'bg-[#FF6B6B] text-white'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  All
+                </button>
                 {foodTypes.map((type) => (
                   <button
                     key={type}
-                    onClick={() => setSelectedFoodType(selectedFoodType === type ? null : type)}
+                    onClick={() => setSelectedCuisine(type)}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                      selectedFoodType === type
+                      selectedCuisine === type
                         ? 'bg-[#FF6B6B] text-white'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
@@ -484,9 +452,9 @@ export default function RecipeSearch() {
                 <div className="text-center text-gray-500 py-12">
                   <div className="text-4xl mb-4">👨‍🍳</div>
                   <p className="text-lg font-medium">
-                    {selectedFoodType
-                      ? 'No recipes found for this cuisine'
-                      : 'Select a cuisine type to find recipes'}
+                    {selectedCuisine === 'All'
+                      ? 'Select a cuisine type to find recipes'
+                      : 'No recipes found for this cuisine'}
                   </p>
                 </div>
               )}

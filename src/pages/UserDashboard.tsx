@@ -60,14 +60,12 @@ export default function UserDashboard() {
         <div className="bg-white shadow rounded-lg p-6 mb-8">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-2xl font-medium text-blue-600">
-                  {user.username.charAt(0).toUpperCase()}
-                </span>
+              <div className="w-10 h-10 rounded-full bg-[#FF6B6B] text-white flex items-center justify-center">
+                {user.email?.charAt(0).toUpperCase()}
               </div>
             </div>
             <div className="ml-4">
-              <h2 className="text-2xl font-bold text-gray-900">{user.username}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{user.email}</h2>
               <p className="text-sm text-gray-500">{user.email}</p>
             </div>
           </div>

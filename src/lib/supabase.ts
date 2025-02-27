@@ -9,9 +9,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    persistSession: true,
     autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+    storage: window.localStorage,
+    storageKey: 'kitchen-chef-auth',
+    flowType: 'implicit'
   },
+  global: {
+    headers: {
+      'X-Client-Info': 'kitchen-chef',
+    },
+  },
+  db: {
+    schema: 'public'
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
+  }
 });
 
 // Type definitions for our database schema

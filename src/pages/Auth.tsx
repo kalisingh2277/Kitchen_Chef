@@ -1,5 +1,5 @@
 import { useState, FormEvent, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import '../styles/animations.css';
 
@@ -119,7 +119,7 @@ export default function Auth() {
           throw new Error('Passwords do not match');
         }
 
-        const message = await signUp(formData.email, formData.password, formData.fullName);
+        await signUp(formData.email, formData.password, formData.fullName);
         setSuccess('Account created successfully! You can now sign in.');
         setTimeout(() => {
           setIsSignUp(false);

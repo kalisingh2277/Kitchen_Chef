@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
 interface RecipeCardProps {
@@ -9,7 +9,7 @@ interface RecipeCardProps {
   cookingTime: number;
   servings: number;
   cuisine: string;
-  calories: number;
+  calories?: number;
   ingredients?: string[];
   measurements?: string[];
   instructions?: string[];
@@ -97,7 +97,7 @@ export default function RecipeCard({
           </div>
           <div className="flex items-center space-x-1 bg-gray-50 px-3 py-1 rounded-full">
             <span className="text-lg">🔥</span>
-            <span className="text-sm font-medium text-gray-600">{calories} kcal</span>
+            <span className="text-sm font-medium text-gray-600">{calories ? calories + ' kcal' : ''}</span>
           </div>
           <div className="flex items-center space-x-1 bg-gray-50 px-3 py-1 rounded-full">
             <span className="text-lg">🌍</span>

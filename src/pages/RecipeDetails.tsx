@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { supabase } from '../lib/supabase';
-import { Link } from 'react-router-dom';
 
 interface Recipe {
   idMeal: string;
@@ -20,7 +17,6 @@ interface Recipe {
 
 export default function RecipeDetails() {
   const { id } = useParams<{ id: string }>();
-  const { user, favorites, toggleFavorite } = useApp();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
