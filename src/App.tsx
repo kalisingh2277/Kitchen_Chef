@@ -9,6 +9,7 @@ import CreateRecipe from './pages/CreateRecipe';
 import Favorites from './pages/Favorites';
 import Profile from './pages/Profile';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import { useApp } from './context/AppContext';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -30,18 +31,21 @@ function App() {
   return (
     <AppProvider>
       <Router>
-        <div className="min-h-screen bg-[#FFF5F5]">
+        <div className="min-h-screen bg-[#FFF5F5] flex flex-col">
           <Header />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/search" element={<RecipeSearch />} />
-            <Route path="/create" element={<CreateRecipe />} />
-            <Route path="/favorites" element={<Favorites />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/recipe/:id" element={<RecipeDetails />} />
-          </Routes>
+          <div className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/search" element={<RecipeSearch />} />
+              <Route path="/create" element={<CreateRecipe />} />
+              <Route path="/favorites" element={<Favorites />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/recipe/:id" element={<RecipeDetails />} />
+            </Routes>
+          </div>
+          <Footer />
         </div>
       </Router>
     </AppProvider>

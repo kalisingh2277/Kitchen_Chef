@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import '../styles/animations.css';
@@ -69,6 +69,15 @@ export default function Auth() {
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    const imageInterval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % foodImages.length);
+      setCurrentQuoteIndex((prev) => (prev + 1) % foodQuotes.length);
+    }, 5000);
+
+    return () => clearInterval(imageInterval);
+  }, []);
 
   const [formData, setFormData] = useState<AuthFormData>({
     fullName: '',
