@@ -63,7 +63,6 @@ export default function Auth() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [registeredEmails, setRegisteredEmails] = useState<string[]>([]);
   const navigate = useNavigate();
   const { signIn, signUp } = useApp();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -100,11 +99,6 @@ export default function Auth() {
         if (!formData.fullName) {
           throw new Error('Full name is required');
         }
-        
-        // Check if email is already registered
-        if (registeredEmails.includes(formData.email)) {
-          throw new Error('This email is already registered. Please sign in instead.');
-        }
 
         // Validate password during sign up
         const validation = validatePassword(formData.password);
@@ -117,12 +111,6 @@ export default function Auth() {
         }
 
         const message = await signUp(formData.email, formData.password, formData.fullName);
-        
-        // Save the email to registered emails
-        const updatedEmails = [...registeredEmails, formData.email];
-        setRegisteredEmails(updatedEmails);
-        localStorage.setItem('registeredEmails', JSON.stringify(updatedEmails));
-        
         setSuccess('Account created successfully! You can now sign in.');
         setTimeout(() => {
           setIsSignUp(false);
@@ -135,11 +123,6 @@ export default function Auth() {
           });
         }, 2000);
       } else {
-        // Check if email exists for sign in
-        if (!registeredEmails.includes(formData.email)) {
-          throw new Error('No account found with this email. Please sign up first.');
-        }
-
         await signIn(formData.email, formData.password);
         navigate('/');
       }
